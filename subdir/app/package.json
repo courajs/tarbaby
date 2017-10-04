@@ -1,8 +1,14 @@
 {
-  "name": "a",
+  "name": "app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "tar.js",
+  "dependencies": {
+    "dockerfilejs": "^1.0.6",
+    "tar-fs": "^1.15.3",
+    "tar-stream": "^1.5.4"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
