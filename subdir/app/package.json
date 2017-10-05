@@ -5,8 +5,7 @@
   "main": "tar.js",
   "dependencies": {
     "dockerfilejs": "^1.0.6",
-    "tar-fs": "^1.15.3",
-    "tar-stream": "^1.5.4"
+    "tar-fs": "courajs/tar-fs#no-finalize"
   },
   "devDependencies": {},
   "scripts": {
