@@ -1,7 +1,6 @@
-const fs = require('fs');
 const path = require('path');
 const child_process = require('child_process');
-const dockerfilejs = require('dockerfilejs');
+const Dockerfile = require('dockerfilejs').Dockerfile;
 const tar = require('tar-fs');
 
 
@@ -15,15 +14,22 @@ go();
 async function go() {
   let pack = await packApp();
 
-  let outStream = fs.createWriteStream('context.tar');
-  pack.pipe(outStream);
+  pack.pipe(process.stdout);
 
   for (let package of packages) {
     await packPackage(pack, package);
   }
-  pack.entry({name: 'generated.txt'}, 'hello');
+
+  let file = new Dockerfile();
+  file.from('busybox')
+    .workdir('/hub')
+    .copy({src: 'app', dest: 'app'})
+    .copy({src: 'packages', dest: 'packages'})
+    .cmd({command: 'sh'});
+
+  pack.entry({name: 'Dockerfile'}, file.render());
   pack.finalize();
-  console.log('wow! done.');
+  console.log('Archive created at ./context.tar');
 }
 
 async function packApp() {
@@ -31,10 +37,7 @@ async function packApp() {
     let pack = tar.pack('.', {
       ignore: or(node_modules, tarfiles),
       map(header) {
-        let newName = path.normalize(path.join('app', header.name));
-        console.log('app mapping', header.name, 'to', newName);
-        header.name = newName;
-        return header;
+        header.name = path.normalize(path.join('app', header.name));
       },
       finalize: false,
       finish: resolve
@@ -63,10 +66,7 @@ async function packPackage(pack, package) {
       finalize: false,
       ignore: node_modules,
       map(header) {
-        let newName = path.normalize(path.join(package.name, header.name));
-        console.log('package mapping', header.name, 'to', newName);
-        header.name = newName;
-        return header;
+        header.name = path.normalize(path.join('packages', package.name, header.name));
       },
       finish: resolve
     })
